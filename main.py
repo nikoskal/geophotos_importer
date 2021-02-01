@@ -49,9 +49,11 @@ async def upload_photo(
 
     # timestamp, photo_name, photo_file, parcel_id, user
     photo_name = file.filename
-    SQL = """INSERT INTO uploaded_photos(timestamp, photo_name, photo_file, parcel_id) VALUES(%s,%s,%s,%s);"""
-    data = (ts,photo_name,psycopg2.Binary(file.file.read()),hash_land)
+    # SQL = """INSERT INTO uploaded_photos(timestamp, photo_name, photo_file, parcel_id) VALUES(%s,%s,%s,%s);"""
+    SQL = """INSERT INTO niva.geotagphotos(parc_id, attached_photo, file_path) VALUES(%s,%s,%s);"""
+    data = (hash_land,psycopg2.Binary(file.file.read()),photo_name)
     db_cursor.execute(SQL, data)
+
 
     db_conn.commit()
     print("Insert done")
@@ -62,6 +64,7 @@ async def upload_photo(
         with open(file.filename, "wb+") as file_object:
             file_object.write(file.file.read())
         return {"res": "file " + file.filename + " uploaded"}
+
 
 
 @app.get("/doc/requests/{user_code}")
@@ -121,7 +124,7 @@ async def get_photo(
         return {"error": "Invalid User Key"}
 
     print (hash_land)
-    db_cursor.execute("""SELECT * FROM uploaded_photos WHERE parcel_id = %s;""", (hash_land,))
+    db_cursor.execute("""SELECT * FROM niva.geotagphotos WHERE parc_id = %s;""", (hash_land,))
     mypic = db_cursor.fetchone()
 
     print(mypic[3])
@@ -129,3 +132,22 @@ async def get_photo(
 
     return ('done')
 
+
+#just for testing#
+@app.get("/query/")
+async def query(
+
+            user_key : Optional[str] = Header(None, convert_underscores=False),
+            ):
+
+    if user_key != correct_user_key:
+        return {"error": "Invalid User Key"}
+
+
+    db_cursor.execute("""SELECT * FROM niva.geotagphotos """, )
+    table = db_cursor.fetchall()
+
+    print(table)
+
+
+    return ("done")
