@@ -32,7 +32,7 @@ db_cursor = db_conn.cursor()
 app      = FastAPI()
 security = HTTPBasic()
 
-correct_user_key = "ccade57851b5936e8455e4758c0d81e1"
+correct_user_key = params.user_key
 
 
 @app.post("/doc/responses/{hash_land}")
@@ -121,10 +121,6 @@ async def get_photo(
         return {"error": "Invalid User Key"}
 
     print (hash_land)
-
-    # SQL = """SELECT * FROM uploaded_photos WHERE parcel_id= '%s' ;"""
-    # data = (hash_land)
-    # db_cursor.execute(SQL, data)
     db_cursor.execute("""SELECT * FROM uploaded_photos WHERE parcel_id = %s;""", (hash_land,))
     mypic = db_cursor.fetchone()
 
